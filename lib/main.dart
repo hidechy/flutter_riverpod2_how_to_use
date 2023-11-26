@@ -1,0 +1,51 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'extensions/extensions.dart';
+
+import 'firebase_options.dart';
+import 'state/walk_record/walk_record.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  runApp(const ProviderScope(child: MyApp()));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: HomePage());
+  }
+}
+
+class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final walkRecord = ref.watch(walkRecordProvider);
+
+    return Scaffold(
+      body: SafeArea(
+        child: walkRecord.when(
+          data: (data) {
+            return ListView.builder(
+              itemCount: data.length,
+              itemBuilder: (context, index) {
+                return Text(data[index].date.yyyymmdd);
+              },
+            );
+          },
+          error: (e, s) => const Center(child: Text('error')),
+          loading: () => const Center(child: CircularProgressIndicator()),
+        ),
+      ),
+    );
+  }
+}
